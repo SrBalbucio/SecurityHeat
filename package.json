@@ -1,0 +1,15 @@
+{
+  "name": "securityheat",
+  "version": "1.0.0",
+  "description": "Site da SecurityHeat",
+  "main": "backend/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SecurityHeatTeam",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "firebase": "^9.17.2"
+  }
+}
