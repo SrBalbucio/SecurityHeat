@@ -13,6 +13,9 @@ const html = `
   <head>
     <title>Hello from Render!</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script type="module" src="static.js"></script>
+    <script type="module" src="content.js"></script>
+    <script type="module" src="auth.js"></script>
     <script>
       setTimeout(() => {
         confetti({
