@@ -292,44 +292,6 @@ video {
     padding-top: 35px
 }
 
-.section-title-5>span {
-    font-family: var(--font-saira);
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-    color: #b5b5b5;
-    display: inline-block;
-    padding: 10px 40px;
-    border: 1px solid rgba(6, 216, 137, .5);
-    position: relative;
-    margin-bottom: 10px
-}
-
-.section-title-5>span::after {
-    content: "";
-    height: 6px;
-    width: 6px;
-    border-radius: 50%;
-    background-color: var(--theme-color);
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%)
-}
-
-.section-title-5>span::before {
-    content: "";
-    height: 6px;
-    width: 6px;
-    border-radius: 50%;
-    background-color: var(--theme-color);
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%)
-}
-
 .section-title-5 h2 {
     font-family: var(--font-saira);
     font-weight: 700;
@@ -6435,7 +6397,7 @@ video {
 
 .home3-pricing-plan-area .pricing-card.two .pricing-top .offer-tag h5 span {
     font-weight: 400;
-    font-size: 20px;
+    font-size: 12px;
     margin-bottom: 0;
     color: var(--white-color)
 }
