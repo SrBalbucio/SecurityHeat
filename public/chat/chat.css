@@ -2,6 +2,11 @@
 message-area
 ******************************** */
 
+.groupimg {
+    width: 45px;
+    height: 45px;
+}
+
 .message-area {
     z-index: 99;
     height: 100vh;

@@ -3,6 +3,8 @@ package com.securityheat.manager;
 import balbucio.discordoauth.model.User;
 import balbucio.sqlapi.model.ConditionModifier;
 import balbucio.sqlapi.model.ConditionValue;
+import balbucio.sqlapi.model.Conditional;
+import balbucio.sqlapi.model.Operator;
 import balbucio.sqlapi.sqlite.HikariSQLiteInstance;
 import com.securityheat.Main;
 
@@ -21,7 +23,7 @@ public class UserManager {
     }
 
     private ConditionValue[] accountExist = new ConditionValue[]{
-            new ConditionValue("discordID", ConditionValue.Conditional.EQUALS, "", ConditionValue.Operator.NULL)
+            new ConditionValue("discordID", Conditional.EQUALS, "", Operator.NULL)
     };
 
     public String createOrGetAccountID(User user){
@@ -33,20 +35,23 @@ public class UserManager {
         } else{
             uid = UUID.randomUUID().toString();
             sqlite.insert("uid, username, discordID, email, creationdate, admin", "'"+uid+"', '"+user.getUsername()+"', '"+discordID+"' ,'"+email+"', '"+ Calendar.getInstance().getTimeInMillis()+"', 'false'", "USERS");
-            String chat = instance.getChatManager().createChat("Bem-Vindo", uid);
-            instance.getChatManager().addMessage("Olá!" +
-                    "Seja bem-vindo(a) a SecurityHeat, este é um canal para te auxiliar com a sua conta e dúvidas gerais. " +
-                    "Se precisar de ajuda, é só dar um grito! " +
+            String chat = instance.getChatManager().createChat("Central da Comunidade", uid, "logo-white.png");
+            instance.getChatManager().addMessage("Olá!\n" +
+                    "Seja bem-vindo(a) a SecurityHeat, estamos entusiasmados em vê-lo por aqui!\n" +
+                    "Esta é a página onde você pode tirar dúvidas, fazer orçamentos, assinar planos e muito mais, sempre será um prazer te atendê-lo. \n" +
+                    "Para que nossa convivência seja melhor ainda, é importante que você se lembre de manter a educação e o respeito em primeiro lugar.\n" +
+                    "Nosso atendimento geral funciona de terça a quinta apartir das 8h, apenas nosso atendimento técnico funciona 24/7 (ele resolve apenas problemas na infraestrutura e hospedagem).\n" +
+                    "\n" +
                     "Atenciosamente, Equipe de Suporte SecurityHeat!", "bot", chat);
         }
-        if(discordID.equals("417356807669940224")){
+        if(discordID.equalsIgnoreCase("417356807669940224")){
             setAdmin(uid);
         }
         return uid;
     }
 
     public String getUsername(String uid){
-        return (String) sqlite.get(new ConditionValue("uid", ConditionValue.Conditional.EQUALS, uid, ConditionValue.Operator.NULL), "username", "USERS");
+        return (String) sqlite.get(new ConditionValue("uid", Conditional.EQUALS, uid, Operator.NULL), "username", "USERS");
     }
 
     public String getAccountID(String discordID){
@@ -54,11 +59,11 @@ public class UserManager {
     }
 
     public void setAdmin(String uid){
-        sqlite.set(new ConditionValue("uid", ConditionValue.Conditional.EQUALS, uid, ConditionValue.Operator.NULL), "admin", true, "USERS");
+        sqlite.update("UPDATE USERS SET 'admin' = 'true' WHERE uid = '"+uid+"';");
     }
 
     public void removeAdmin(String uid){
-        sqlite.set("uid", "=", uid, "admin", false, "USERS");
+        sqlite.set("uid", "=", uid, "admin", "false", "USERS");
     }
 
     public boolean isAdmin(String uid){

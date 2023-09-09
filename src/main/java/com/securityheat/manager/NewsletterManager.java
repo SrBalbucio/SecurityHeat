@@ -2,9 +2,10 @@ package com.securityheat.manager;
 
 import balbucio.sqlapi.model.ConditionModifier;
 import balbucio.sqlapi.model.ConditionValue;
+import balbucio.sqlapi.model.Conditional;
+import balbucio.sqlapi.model.Operator;
 import balbucio.sqlapi.sqlite.HikariSQLiteInstance;
 import com.securityheat.Main;
-import org.checkerframework.checker.units.qual.N;
 
 public class NewsletterManager {
 
@@ -18,7 +19,7 @@ public class NewsletterManager {
     }
 
     private ConditionValue[] condition = new ConditionValue[]{
-            new ConditionValue("email", ConditionValue.Conditional.EQUALS, "", ConditionValue.Operator.NULL)
+            new ConditionValue("email", Conditional.EQUALS, "", Operator.NULL)
     };
 
     public void registerInNewsletter(String email){

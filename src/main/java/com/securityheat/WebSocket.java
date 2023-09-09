@@ -31,21 +31,21 @@ public class WebSocket extends WebSocketServer {
     public void onMessage(org.java_websocket.WebSocket webSocket, String s) {
         try {
             JSONObject json = new JSONObject(s);
-            if(json.has("type")){
+            if (json.has("type")) {
                 String type = json.getString("type");
-                if(type.equalsIgnoreCase("NEWSLETTER")){
+                if (type.equalsIgnoreCase("NEWSLETTER")) {
                     webSocket.send(new JSONObject()
                             .put("type", "NEWSLETTER")
                             .put("message", "Seu email foi registrado na nossa Newsletter, agradecemos imensamente o seu interesse!")
                             .toString());
                     instance.getNewsletterManager().registerInNewsletter(json.getString("email"));
-                } else if(type.equalsIgnoreCase("LOGIN")){
+                } else if (type.equalsIgnoreCase("LOGIN")) {
                     webSocket.send(new JSONObject()
                             .put("type", "LOGIN_URL")
                             .put("url", instance.getDiscordProvider().getURL(json.getInt("value")))
                             .toString());
-                } else if(type.equalsIgnoreCase("CODE")){
-                    try{
+                } else if (type.equalsIgnoreCase("CODE")) {
+                    try {
                         DiscordAPI dc = instance.getDiscordProvider().getAPI(json.getString("code"));
                         webSocket.send(new JSONObject()
                                 .put("type", "LOGIN")
@@ -55,92 +55,99 @@ public class WebSocket extends WebSocketServer {
                                 .put("type", "ACTION")
                                 .put("action", 0)
                                 .toString());
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                         webSocket.send(new JSONObject()
                                 .put("type", "ERRO")
                                 .put("value", "Não foi possível fazer login usando sua conta Discord!")
                                 .toString());
                     }
-                } else if(type.equalsIgnoreCase("NEWCHAT")){
+                } else if (type.equalsIgnoreCase("NEWCHAT")) {
                     String id = json.getString("user");
                     int action = json.getInt("action");
                     String chatid = "null";
                     switch (action) {
                         case 1: {
-                            chatid = instance.getChatManager().createChat("Suporte", id);
+                            chatid = instance.getChatManager().createChat("Suporte", id, "orc.png");
                             instance.getChatManager().addMessage("Olá, no que podemos te ajudar hoje?", "bot", chatid);
                             break;
                         }
                         case 10: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADC", id);
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADC", id, "orc.png");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Análise de Conversão.", id, chatid);
                             break;
                         }
                         case 11: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADS", id);
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADS", id, "orc.png");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Análise de Segurança.", id, chatid);
                             break;
                         }
                         case 12: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: APP", id);
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: APP", id, "orc.png");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Criação de Aplicativos.", id, chatid);
                             break;
                         }
                         case 13: {
-                            chatid = instance.getChatManager().createChat("Novo Pedido: HOST", id);
+                            chatid = instance.getChatManager().createChat("Novo Pedido: HOST", id, "ass.png");
                             instance.getChatManager().addMessage("Queria assinar um plano de Hospedagem.", id, chatid);
                             break;
                         }
                         case 14: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Manutenção", id);
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Manutenção", id, "orc.png");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Manutenção.", id, chatid);
                             break;
                         }
                         case 15: {
-                            chatid = instance.getChatManager().createChat("Novo Pedido: Registro de Domínio", id);
+                            chatid = instance.getChatManager().createChat("Novo Pedido: Registro de Domínio", id, "ass.png");
                             instance.getChatManager().addMessage("Queria fazer o registro de um domínio.", id, chatid);
                             break;
                         }
                         case 16: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Site", id);
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Site", id, "orc.png");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Site.", id, chatid);
                             break;
                         }
                     }
                     webSocket.send(new JSONObject()
-                            .put("type", "CHATUPDATE")
-                            .put("chatid", chatid)
+                            .put("type", "CHATLIST")
+                            .put("adminonly", json.getString("uid").equalsIgnoreCase("admin"))
+                            .put("chats", instance.getChatManager().getChats(json.getString("uid")))
                             .toString());
-                } else if(type.equalsIgnoreCase("CHECKADMIN")){
+                } else if (type.equalsIgnoreCase("CHECKADMIN")) {
                     webSocket.send(new JSONObject()
                             .put("type", "ADMIN")
                             .put("is", instance.getUserManager().isAdmin(json.getString("uid")))
                             .toString());
-                } else if(type.equalsIgnoreCase("UPDATECHAT")){
+                } else if (type.equalsIgnoreCase("UPDATECHAT")) {
                     webSocket.send(new JSONObject()
                             .put("type", "CHATLIST")
+                            .put("adminonly", json.getString("uid").equalsIgnoreCase("admin"))
                             .put("chats", instance.getChatManager().getChats(json.getString("uid")))
                             .toString());
-                } else if(type.equalsIgnoreCase("UPDATEUNREADMESSAGES")){
-                    if(json.get("chat") != JSONObject.NULL) {
+                } else if (type.equalsIgnoreCase("UPDATEUNREADMESSAGES")) {
+                    if (json.get("chat") != JSONObject.NULL) {
                         webSocket.send(new JSONObject()
                                 .put("type", "UNREAD")
                                 .put("messages", instance.getChatManager().getUnreadMessages(json.getString("chat"), json.getString("user")))
                                 .toString());
                     }
-                }else if(type.equalsIgnoreCase("LOADMESSAGES")){
-                    if(json.get("chat") != JSONObject.NULL) {
+                } else if (type.equalsIgnoreCase("LOADMESSAGES")) {
+                    if (json.get("chat") != JSONObject.NULL) {
                         webSocket.send(new JSONObject()
                                 .put("type", "MESSAGES")
                                 .put("messages", instance.getChatManager().getMessages(json.getString("chat"), json.getString("user")))
                                 .toString());
                     }
-                } else if(type.equalsIgnoreCase("SENDMSG")){
+                } else if (type.equalsIgnoreCase("SENDMSG")) {
                     instance.getChatManager().addMessage(json.getString("message"), json.getString("user"), json.getString("uid"));
+                } else if (type.equalsIgnoreCase("GETFIRSTCHAT")) {
+                    webSocket.send(new JSONObject()
+                            .put("type", "FIRSTCHAT")
+                            .put("chatid", instance.getChatManager().getFirstChat(json.getString("user")))
+                            .toString());
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
