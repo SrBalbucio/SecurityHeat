@@ -25,14 +25,14 @@ public class ChatManager {
     public ChatManager(Main instance) {
         this.instance = instance;
         this.sqlite = instance.getSqlite();
-        sqlite.createTable("chat", "uid VARCHAR(255), title VARCHAR(255), owner VARCHAR(255), creationdate BIGINT, state VARCHAR(255), img VARCHAR(255)");
+        sqlite.createTable("chat", "uid VARCHAR(255), title VARCHAR(255), owner VARCHAR(255), creationdate BIGINT, state VARCHAR(255), img VARCHAR(255), category VARCHAR(255)");
         sqlite.createTable("messages", "uid VARCHAR(255), read BOOLEAN, message TEXT, owner VARCHAR(255), chat VARCHAR(255), time BIGINT");
     }
 
-    public String createChat(String title, String owner, String img) {
+    public String createChat(String title, String owner, String img, String category) {
         UUID uid = UUID.randomUUID();
-        sqlite.insert("uid, title, owner, creationdate, state, img",
-                "'" + uid.toString() + "', '" + title + "', '" + owner + "', '" + Calendar.getInstance().getTimeInMillis() + "', 'OPEN', '"+img+"'",
+        sqlite.insert("uid, title, owner, creationdate, state, img, category",
+                "'" + uid.toString() + "', '" + title + "', '" + owner + "', '" + Calendar.getInstance().getTimeInMillis() + "', 'OPEN', '"+img+"', '"+category+"'",
                 "chat");
         return uid.toString();
     }
@@ -52,6 +52,7 @@ public class ChatManager {
             chat.put("desc", "Criado em " + SDF.format(new Date(date)));
             chat.put("state", sqlite.get("uid", "=", (String) o, "state", "chat"));
             chat.put("img", sqlite.get("uid", "=", (String) o, "img", "chat"));
+            chat.put("category", sqlite.get("uid", "=", (String) o, "category", "chat"));
             chat.put("creationdate", date);
             chat.put("owner", owner);
             chat.put("username", instance.getUserManager().getUsername(owner));
@@ -74,6 +75,7 @@ public class ChatManager {
                     chat.put("desc", "Clique para responder! - Criado em " + SDF.format(new Date(o.asLong("creationdate"))));
                     chat.put("state", o.asString("state"));
                     chat.put("img", o.asString("img"));
+                    chat.put("category", o.asString("category"));
                     chat.put("creationdate", o.asLong("creationdate"));
                     chat.put("owner", o.asString("owner"));
                     chat.put("username", instance.getUserManager().getUsername(o.asString("owner")));
@@ -144,6 +146,17 @@ public class ChatManager {
 
     public void setRead(String messageId, String chat) {
         sqlite.set(new ConditionModifier(messageCondition, messageId, chat).done(), "read", "true", "messages");
+    }
+
+    private ConditionValue[] chatCondition = new ConditionValue[]{
+            new ConditionValue("category", Conditional.EQUALS, "", Operator.NULL)
+    };
+
+    public void broadcast(String message, String category){
+        List<ResultValue> allchat = sqlite.getAllValuesFromColumns("chat", new ConditionModifier(chatCondition, category).done());
+        allchat.forEach(c -> {
+            addMessage(message, "bot", c.asString("uid"));
+        });
     }
 
     public String addMessage(String message, String owner, String chat) {

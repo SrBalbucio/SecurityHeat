@@ -68,42 +68,42 @@ public class WebSocket extends WebSocketServer {
                     String chatid = "null";
                     switch (action) {
                         case 1: {
-                            chatid = instance.getChatManager().createChat("Suporte", id, "orc.png");
+                            chatid = instance.getChatManager().createChat("Suporte", id, "orc.png", "suporte");
                             instance.getChatManager().addMessage("Olá, no que podemos te ajudar hoje?", "bot", chatid);
                             break;
                         }
                         case 10: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADC", id, "orc.png");
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADC", id, "orc.png", "suporte");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Análise de Conversão.", id, chatid);
                             break;
                         }
                         case 11: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADS", id, "orc.png");
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: ADS", id, "orc.png", "suporte");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Análise de Segurança.", id, chatid);
                             break;
                         }
                         case 12: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: APP", id, "orc.png");
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: APP", id, "orc.png", "suporte");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Criação de Aplicativos.", id, chatid);
                             break;
                         }
                         case 13: {
-                            chatid = instance.getChatManager().createChat("Novo Pedido: HOST", id, "ass.png");
+                            chatid = instance.getChatManager().createChat("Novo Pedido: HOST", id, "ass.png", "suporte");
                             instance.getChatManager().addMessage("Queria assinar um plano de Hospedagem.", id, chatid);
                             break;
                         }
                         case 14: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Manutenção", id, "orc.png");
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Manutenção", id, "orc.png", "suporte");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Manutenção.", id, chatid);
                             break;
                         }
                         case 15: {
-                            chatid = instance.getChatManager().createChat("Novo Pedido: Registro de Domínio", id, "ass.png");
+                            chatid = instance.getChatManager().createChat("Novo Pedido: Registro de Domínio", id, "ass.png", "suporte");
                             instance.getChatManager().addMessage("Queria fazer o registro de um domínio.", id, chatid);
                             break;
                         }
                         case 16: {
-                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Site", id, "orc.png");
+                            chatid = instance.getChatManager().createChat("Pedido de Orçamento: Site", id, "orc.png", "suporte");
                             instance.getChatManager().addMessage("Queria fazer um orçamento de Site.", id, chatid);
                             break;
                         }

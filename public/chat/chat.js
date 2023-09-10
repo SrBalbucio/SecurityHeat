@@ -80,8 +80,7 @@ socket.addEventListener("message", (m) => {
                     } else if (chatid === info.uid) {
                         chatusername.innerText = info.title;
                         chatdesc.innerText = info.desc;
-                        console.log(info.title.includes("Boas vindas"))
-                        if(info.title.includes("Central da Comunidade")){
+                        if(info.category.includes("updatechannel")){
                             sendmsg.setAttribute("disabled", "");
                             inputmsg.setAttribute("disabled", "");
                         }
