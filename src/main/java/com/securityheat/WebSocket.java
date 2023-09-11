@@ -110,8 +110,8 @@ public class WebSocket extends WebSocketServer {
                     }
                     webSocket.send(new JSONObject()
                             .put("type", "CHATLIST")
-                            .put("adminonly", json.getString("uid").equalsIgnoreCase("admin"))
-                            .put("chats", instance.getChatManager().getChats(json.getString("uid")))
+                            .put("adminonly", json.getString("user").equalsIgnoreCase("admin"))
+                            .put("chats", instance.getChatManager().getChats(json.getString("user")))
                             .toString());
                 } else if (type.equalsIgnoreCase("CHECKADMIN")) {
                     webSocket.send(new JSONObject()
@@ -135,11 +135,17 @@ public class WebSocket extends WebSocketServer {
                     if (json.get("chat") != JSONObject.NULL) {
                         webSocket.send(new JSONObject()
                                 .put("type", "MESSAGES")
-                                .put("messages", instance.getChatManager().getMessages(json.getString("chat"), json.getString("user")))
+                                .put("messages", instance.getChatManager().getMessages(json.getString("chat"), json.getString("user"), json.getBoolean("state")))
                                 .toString());
                     }
                 } else if (type.equalsIgnoreCase("SENDMSG")) {
-                    instance.getChatManager().addMessage(json.getString("message"), json.getString("user"), json.getString("uid"));
+                    if(json.getBoolean("state")){
+                        if(instance.getUserManager().isAdmin(json.getString("user"))){
+                            instance.getChatManager().addMessage(json.getString("message"), "spp", json.getString("uid"));
+                        }
+                    } else {
+                        instance.getChatManager().addMessage(json.getString("message"), json.getString("user"), json.getString("uid"));
+                    }
                 } else if (type.equalsIgnoreCase("GETFIRSTCHAT")) {
                     webSocket.send(new JSONObject()
                             .put("type", "FIRSTCHAT")

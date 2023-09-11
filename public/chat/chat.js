@@ -5,21 +5,28 @@ let accountid = undefined;
 let admin= false;
 let urlparams = new URLSearchParams(window.location.search);
 let chatid = undefined;
+let chatadm = false;
 let chatdesc = document.getElementById("chatdesc");
 let chatusername = document.getElementById("chatname");
 let sendmsg = document.getElementById("sendmessage");
 let inputmsg = document.getElementById("inputmsg");
 let allchats = []
+let allchatsadm = []
 let allmessages = []
 
 if(urlparams.has("chat")){
     chatid = urlparams.get("chat");
+    chatadm = urlparams.has("adm");
+    if(chatid.includes("console")){
+        chatusername.innerText = "Console";
+        chatdesc.innerText = "Execute comandos por aqui! | Cuidado ao executar comandos";
+    }
 }
 
 socket.addEventListener("open", (e) => {
     if(logged){
         if(chatid !== undefined){
-            socket.send('{"type":"LOADMESSAGES", "chat": ' + chatid + ', "user": '+accountid+'}');
+            socket.send('{"type":"LOADMESSAGES", "chat": ' + chatid + ', "user": '+accountid+', "state":'+chatadm+'}');
         } else{
             socket.send('{"type":"GETFIRSTCHAT", "user": ' + accountid + '}');
         }
@@ -40,11 +47,11 @@ socket.addEventListener("message", (m) => {
     } else if(payload.type === "CHATLIST"){
         for (let i = 0; i < payload.chats.length; i++) {
             let info = payload.chats[i];
-            if (!allchats.includes(info.uid)) {
+            let foradm = info.adm;
+            if (!allchats.includes(info.uid) || (foradm && !allchatsadm.includes(info.uid))) {
                 allchats.push(info.uid);
-                let foradm = payload.adminonly;
                 let chat = document.createElement("a");
-                chat.setAttribute("href", "chat.html?chat=" + info.uid);
+                chat.setAttribute("href", "chat.html?chat=" + info.uid + (foradm ? "&adm=true" : ""));
                 chat.setAttribute("class", "d-flex align-items-center");
                 if (!foradm) {
                     chat.innerHTML = `<div class="flex-shrink-0">
@@ -57,6 +64,7 @@ socket.addEventListener("message", (m) => {
                                                             <p>` + info.desc + `</p>
                                                         </div>`
                 } else {
+                    allchatsadm.push(info.uid);
                     chat.innerHTML = `<div class="flex-shrink-0">
                                                             <img class="img-fluid groupimg"
                                                                  src="`+info.img+`"
@@ -68,33 +76,35 @@ socket.addEventListener("message", (m) => {
                                                         </div>`
                 }
 
-                if (chatid === undefined) {
+                if (chatid === undefined && !foradm) {
                     chatid = info.uid;
-                    socket.send('{"type":"LOADMESSAGES", "chat": ' + chatid + ', "user": ' + accountid + '}');
+                    socket.send('{"type":"LOADMESSAGES", "chat": ' + chatid + ', "user": ' + accountid + ', "state":'+chatadm+'}');
                 }
 
                 if (chatid === info.uid) {
-                    if (foradm) {
+                    if (foradm && chatadm) {
                         chatusername.innerText = info.username;
                         chatdesc.innerText = info.title + " | " + info.desc;
-                    } else if (chatid === info.uid) {
-                        chatusername.innerText = info.title;
-                        chatdesc.innerText = info.desc;
-                        if(info.category.includes("updatechannel")){
-                            sendmsg.setAttribute("disabled", "");
-                            inputmsg.setAttribute("disabled", "");
+                    } else if (chatid === info.uid && !foradm) {
+                        if(!chatadm) {
+                            chatusername.innerText = info.title;
+                            chatdesc.innerText = info.desc;
+                            if (info.category.includes("updatechannel")) {
+                                sendmsg.setAttribute("disabled", "");
+                                inputmsg.setAttribute("disabled", "");
+                            }
                         }
                     }
                 }
 
                 if (!foradm) {
                     if (info.state === "OPEN") {
-                        document.getElementById("Open").appendChild(chat);
+                        document.getElementById("listOpen").appendChild(chat);
                     } else if (info.state === "CLOSED") {
-                        document.getElementById("Closed").appendChild(chat);
+                        document.getElementById("listClose").appendChild(chat);
                     }
                 } else {
-                    document.getElementById("Suporte").appendChild(chat);
+                    document.getElementById("listSuporte").appendChild(chat);
                 }
             }
         }
@@ -115,7 +125,22 @@ socket.addEventListener("message", (m) => {
             let info = payload.messages[i];
             if(!allmessages.includes(info.uid)) {
                 let message = document.createElement("li");
-                message.setAttribute("class", (info.owner === accountid ? "repaly" : "sender"));
+                let me = info.owner === accountid;
+                let cl;
+                if(me){
+                    if(!chatadm){
+                        cl = "repaly";
+                    } else{
+                        cl = "sender";
+                    }
+                } else{
+                    if(!chatadm){
+                        cl = "sender"
+                    } else {
+                        cl = "repaly"
+                    }
+                }
+                message.setAttribute("class", cl);
                 message.innerHTML = `<p> ` + info.message + ` </p>
                                                 <span class="time">` + info.time + `</span>`
                 document.getElementById("msgslist").appendChild(message);
@@ -154,13 +179,13 @@ function updateChat(){
             socket.send('{"type":"UPDATECHAT", "uid":"admin"}');
         }
     }
-    setTimeout(updateChat, 10000)
+    setTimeout(updateChat, 1000)
 }
 
 function updateMessages() {
     if(logged) {
         if (chatid !== undefined) {
-            socket.send('{"type":"LOADMESSAGES", "chat": ' + chatid + ', "user": ' + accountid + '}');
+            socket.send('{"type":"LOADMESSAGES", "chat": ' + chatid + ', "user": ' + accountid + ', "state":'+chatadm+'}');
         }
     }
     setTimeout(updateMessages, 500)
@@ -168,9 +193,16 @@ function updateMessages() {
 
 function sendMessage(){
     if(inputmsg.value != "" && chatid !== undefined && logged){
-        socket.send('{"type":"SENDMSG", "uid":"'+chatid+'", "message":'+inputmsg.value+', "user":'+accountid+' }');
+        socket.send('{"type":"SENDMSG", "uid":"'+chatid+'", "message":'+inputmsg.value+', "user":'+accountid+', "state":'+chatadm+' }');
     }
     inputmsg.value = "";
 }
 
 sendmsg.addEventListener("click", sendMessage)
+
+inputmsg.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage()
+    }
+});

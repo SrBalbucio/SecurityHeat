@@ -38,7 +38,7 @@ public class UserManager {
             String chat = instance.getChatManager().createChat("Central da Comunidade", uid, "logo-white.png", "updatechannel");
             instance.getChatManager().addMessage("Olá!<br>" +
                     "Seja bem-vindo(a) a SecurityHeat, estamos entusiasmados em vê-lo por aqui!<br>" +
-                    "Esta é a página onde você pode tirar dúvidas, fazer orçamentos, assinar planos e muito mais, sempre será um prazer te atendê-lo. <br>" +
+                    "Esta é a página onde você pode tirar dúvidas, fazer orçamentos, assinar planos e muito mais, sempre será um prazer atendê-lo. <br>" +
                     "Para que nossa convivência seja melhor ainda, é importante que você se lembre de manter a educação e o respeito em primeiro lugar.<br>" +
                     "Nosso atendimento geral funciona de terça a quinta apartir das 8h, apenas nosso atendimento técnico funciona 24/7 (ele resolve apenas problemas na infraestrutura e hospedagem).<br>" +
                     "<br>" +
@@ -67,6 +67,6 @@ public class UserManager {
     }
 
     public boolean isAdmin(String uid){
-        return Boolean.getBoolean((String) sqlite.get("uid", "=", uid, "admin","USERS"));
+        return Boolean.parseBoolean((String) sqlite.get("uid", "=", uid, "admin","USERS"));
     }
 }

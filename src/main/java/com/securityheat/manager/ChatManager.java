@@ -27,6 +27,18 @@ public class ChatManager {
         this.sqlite = instance.getSqlite();
         sqlite.createTable("chat", "uid VARCHAR(255), title VARCHAR(255), owner VARCHAR(255), creationdate BIGINT, state VARCHAR(255), img VARCHAR(255), category VARCHAR(255)");
         sqlite.createTable("messages", "uid VARCHAR(255), read BOOLEAN, message TEXT, owner VARCHAR(255), chat VARCHAR(255), time BIGINT");
+        if(!hasChat("console", "admin")){
+            createChat("console", "admin", "terminal.jpg", "console");
+        }
+    }
+
+    private ConditionValue[] hasChat = new ConditionValue[]{
+            new ConditionValue("title", Conditional.EQUALS, "", Operator.NULL),
+            new ConditionValue("owner", Conditional.EQUALS, "", Operator.AND),
+    };
+
+    public boolean hasChat(String title, String owner){
+        return sqlite.exists(new ConditionModifier(hasChat, title, owner).done(), "chat");
     }
 
     public String createChat(String title, String owner, String img, String category) {
@@ -63,11 +75,13 @@ public class ChatManager {
 
     public JSONArray getAllChats() {
         List<ResultValue> chats = sqlite.getAllValuesOrderedBy("creationdate", "chat");
+        System.out.println(chats.size());
         JSONArray array = new JSONArray();
         chats.forEach(o -> {
-            if (o.asString("state").equalsIgnoreCase("OPEN")) {
-                String title = o.asString("title");
-                if(!title.equalsIgnoreCase("Central da Comunidade")) {
+            String category = o.asString("category");
+            if(!(category.equalsIgnoreCase("console") || category.equalsIgnoreCase("updatechannel"))) {
+                if (o.asString("state").equalsIgnoreCase("OPEN")) {
+                    String title = o.asString("title");
                     JSONObject chat = new JSONObject();
                     chat.put("uid", o.asString("uid"));
                     chat.put("adm", true);
@@ -75,7 +89,7 @@ public class ChatManager {
                     chat.put("desc", "Clique para responder! - Criado em " + SDF.format(new Date(o.asLong("creationdate"))));
                     chat.put("state", o.asString("state"));
                     chat.put("img", o.asString("img"));
-                    chat.put("category", o.asString("category"));
+                    chat.put("category", category);
                     chat.put("creationdate", o.asLong("creationdate"));
                     chat.put("owner", o.asString("owner"));
                     chat.put("username", instance.getUserManager().getUsername(o.asString("owner")));
@@ -83,6 +97,7 @@ public class ChatManager {
                 }
             }
         });
+        System.out.println(array.length());
         return array;
     }
 
@@ -96,7 +111,10 @@ public class ChatManager {
         }
     }
 
-    public JSONArray getMessages(String chat, String user) {
+    public JSONArray getMessages(String chat, String user, boolean isAdm) {
+        if(chat.equalsIgnoreCase("console") && !instance.getUserManager().isAdmin(user)){
+            return new JSONArray();
+        }
         List<Object> uids = sqlite.getAll("chat", "=", chat, "uid", "messages");
         JSONArray array = new JSONArray();
         uids.forEach(o -> {
@@ -108,7 +126,7 @@ public class ChatManager {
                 message.put("owner", owner);
                 message.put("time", SDF_MSG.format(new Date((long) sqlite.get("uid", "=", (String) o, "time", "messages"))) + " | " + (read ? "Visto" : "Entregue"));
                 message.put("chat", chat);
-                if (!owner.equalsIgnoreCase(user)) {
+                if (!owner.equalsIgnoreCase(user) || isAdm) {
                     setRead((String) o, chat);
                 }
                 array.put(message);
@@ -117,6 +135,9 @@ public class ChatManager {
     }
 
     public JSONArray getUnreadMessages(String chat, String user) {
+        if(chat.equalsIgnoreCase("console") && !instance.getUserManager().isAdmin(user)){
+            return new JSONArray();
+        }
         List<Object> uids = sqlite.getAll("chat", "=", chat, "uid", "messages");
         JSONArray array = new JSONArray();
         uids.forEach(o -> {
@@ -160,8 +181,11 @@ public class ChatManager {
     }
 
     public String addMessage(String message, String owner, String chat) {
+        if(chat.equalsIgnoreCase("console") && !instance.getUserManager().isAdmin(owner)){
+            return new String();
+        }
         UUID uid = UUID.randomUUID();
-        sqlite.insert("uid, read, message, owner, chat, time", "'" + uid.toString() + "', 'read', '" + message + "', '" + owner + "', '" + chat + "', '" + System.currentTimeMillis() + "'", "messages");
+        sqlite.insert("uid, read, message, owner, chat, time", "'" + uid.toString() + "', 'false', '" + message + "', '" + owner + "', '" + chat + "', '" + System.currentTimeMillis() + "'", "messages");
         return uid.toString();
     }
 }
