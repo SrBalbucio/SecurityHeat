@@ -9,8 +9,6 @@ socket.addEventListener("open", (e) => {
     if (urlParams.has("code") && !logged) {
         console.log("Identificado um codigo de login!")
         socket.send('{"type":"CODE", "code": "' + urlParams.get("code") + '", "state": "' + urlParams.get("state") + '"}')
-        urlParams.delete("code")
-        urlParams.delete("state")
     }
     if(logged){
         checkAdmin()
@@ -28,6 +26,7 @@ socket.addEventListener("message", (m) => {
         cookies.set('account', payload.value, {expires: 1})
         logged = true;
         accountid = payload.value;
+        updatePage()
     } else if(payload.type === "ERRO"){
         alert(payload.value);
     } else if(payload.type === "ACTION"){
@@ -78,4 +77,10 @@ function registerNewsletter() {
         socket.send('{"type":"NEWSLETTER", "email": ' + input.value + '}')
         input.value = "";
     }
+}
+
+function updatePage(){
+    urlparams.delete("code")
+    urlparams.delete("state")
+    window.location.reload();
 }

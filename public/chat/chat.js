@@ -8,11 +8,16 @@ let chatid = undefined;
 let chatadm = false;
 let chatdesc = document.getElementById("chatdesc");
 let chatusername = document.getElementById("chatname");
+let chatimg = document.getElementById("userimg");
 let sendmsg = document.getElementById("sendmessage");
 let inputmsg = document.getElementById("inputmsg");
 let allchats = []
 let allchatsadm = []
 let allmessages = []
+
+if(urlparams.has("code")){
+    updatePage();
+}
 
 if(urlparams.has("chat")){
     chatid = urlparams.get("chat");
@@ -83,10 +88,12 @@ socket.addEventListener("message", (m) => {
 
                 if (chatid === info.uid) {
                     if (foradm && chatadm) {
+                        chatimg.setAttribute("src", info.img)
                         chatusername.innerText = info.username;
                         chatdesc.innerText = info.title + " | " + info.desc;
                     } else if (chatid === info.uid && !foradm) {
                         if(!chatadm) {
+                            chatimg.setAttribute("src", info.img)
                             chatusername.innerText = info.title;
                             chatdesc.innerText = info.desc;
                             if (info.category.includes("updatechannel")) {
@@ -168,6 +175,8 @@ function setAdminMode(){
 }
 
 function updatePage(){
+    urlparams.delete("code")
+    urlparams.delete("state")
     window.location.reload();
 }
 

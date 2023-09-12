@@ -2,9 +2,7 @@ package com.securityheat;
 
 import balbucio.sqlapi.sqlite.HikariSQLiteInstance;
 import balbucio.sqlapi.sqlite.SqliteConfig;
-import com.securityheat.manager.ChatManager;
-import com.securityheat.manager.NewsletterManager;
-import com.securityheat.manager.UserManager;
+import com.securityheat.manager.*;
 import com.securityheat.oauth.DiscordProvider;
 import lombok.Data;
 
@@ -25,6 +23,8 @@ public class Main {
     private NewsletterManager newsletterManager;
     private UserManager userManager;
     private ChatManager chatManager;
+    private ActionManager actionManager;
+    private CommandManager commandManager;
 
     public Main(){
         SqliteConfig sqliteConfig = new SqliteConfig(new File("database.db"));
@@ -34,6 +34,8 @@ public class Main {
         this.newsletterManager = new NewsletterManager(this);
         this.userManager = new UserManager(this);
         this.chatManager = new ChatManager(this);
+        this.actionManager = new ActionManager(this);
+        this.commandManager = new CommandManager(this);
         this.server = new WebSocket(new InetSocketAddress("127.0.0.1", 25465), this);
         server.run();
     }

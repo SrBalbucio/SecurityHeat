@@ -25,7 +25,8 @@ public class ChatManager {
     public ChatManager(Main instance) {
         this.instance = instance;
         this.sqlite = instance.getSqlite();
-        sqlite.createTable("chat", "uid VARCHAR(255), title VARCHAR(255), owner VARCHAR(255), creationdate BIGINT, state VARCHAR(255), img VARCHAR(255), category VARCHAR(255)");
+        sqlite.createTable("chat", "uid VARCHAR(255), title VARCHAR(255), owner VARCHAR(255), creationdate BIGINT, state VARCHAR(255), img VARCHAR(255), category VARCHAR(255), action VARCHAR(255)");
+        sqlite.createTable("actions", "uid VARCHAR(255), title VARCHAR(255), data TEXT");
         sqlite.createTable("messages", "uid VARCHAR(255), read BOOLEAN, message TEXT, owner VARCHAR(255), chat VARCHAR(255), time BIGINT");
         if(!hasChat("console", "admin")){
             createChat("console", "admin", "terminal.jpg", "console");
@@ -44,7 +45,7 @@ public class ChatManager {
     public String createChat(String title, String owner, String img, String category) {
         UUID uid = UUID.randomUUID();
         sqlite.insert("uid, title, owner, creationdate, state, img, category",
-                "'" + uid.toString() + "', '" + title + "', '" + owner + "', '" + Calendar.getInstance().getTimeInMillis() + "', 'OPEN', '"+img+"', '"+category+"'",
+                "'" + uid.toString() + "', '" + title + "', '" + owner + "', '" + Calendar.getInstance().getTimeInMillis() + "', 'OPEN', '"+img+"', '"+category+"', 'NONE'",
                 "chat");
         return uid.toString();
     }
@@ -184,8 +185,17 @@ public class ChatManager {
         if(chat.equalsIgnoreCase("console") && !instance.getUserManager().isAdmin(owner)){
             return new String();
         }
+
+        if(instance.getCommandManager().isCommand(message)){
+            return instance.getCommandManager().run(message);
+        }
+
         UUID uid = UUID.randomUUID();
         sqlite.insert("uid, read, message, owner, chat, time", "'" + uid.toString() + "', 'false', '" + message + "', '" + owner + "', '" + chat + "', '" + System.currentTimeMillis() + "'", "messages");
         return uid.toString();
+    }
+
+    public void createAction(String chat){
+
     }
 }
