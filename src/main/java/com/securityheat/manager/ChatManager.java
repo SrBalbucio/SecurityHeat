@@ -3,6 +3,7 @@ package com.securityheat.manager;
 import balbucio.sqlapi.model.*;
 import balbucio.sqlapi.sqlite.HikariSQLiteInstance;
 import com.securityheat.Main;
+import com.securityheat.model.Action;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,7 +27,6 @@ public class ChatManager {
         this.instance = instance;
         this.sqlite = instance.getSqlite();
         sqlite.createTable("chat", "uid VARCHAR(255), title VARCHAR(255), owner VARCHAR(255), creationdate BIGINT, state VARCHAR(255), img VARCHAR(255), category VARCHAR(255), action VARCHAR(255)");
-        sqlite.createTable("actions", "uid VARCHAR(255), title VARCHAR(255), data TEXT");
         sqlite.createTable("messages", "uid VARCHAR(255), read BOOLEAN, message TEXT, owner VARCHAR(255), chat VARCHAR(255), time BIGINT");
         if(!hasChat("console", "admin")){
             createChat("console", "admin", "terminal.jpg", "console");
@@ -186,8 +186,12 @@ public class ChatManager {
             return new String();
         }
 
+        if(hasAction(chat) && !(owner.equalsIgnoreCase("bot") || owner.equalsIgnoreCase("spp"))){
+            return instance.getActionManager().execute(getAction(chat), chat, message);
+        }
+
         if(instance.getCommandManager().isCommand(message)){
-            return instance.getCommandManager().run(message);
+            return instance.getCommandManager().run(message, owner, chat);
         }
 
         UUID uid = UUID.randomUUID();
@@ -195,7 +199,19 @@ public class ChatManager {
         return uid.toString();
     }
 
-    public void createAction(String chat){
+    public String getAction(String chat){
+        return (String) sqlite.get("uid", "=", chat, "action", "messages");
+    }
 
+    public void setAction(String action, String chat){
+        sqlite.set("uid", "=", chat, "action", action, "messages");
+    }
+
+    public void removeAction(String chat){
+        setAction("NONE", chat);
+    }
+
+    public boolean hasAction(String chat){
+        return getAction(chat).equalsIgnoreCase("NONE");
     }
 }
