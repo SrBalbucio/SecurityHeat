@@ -187,7 +187,7 @@ public class ChatManager {
         }
 
         if(hasAction(chat) && !(owner.equalsIgnoreCase("bot") || owner.equalsIgnoreCase("spp"))){
-            return instance.getActionManager().execute(getAction(chat), chat, message);
+            return instance.getActionManager().execute(getAction(chat), chat, owner, message);
         }
 
         if(instance.getCommandManager().isCommand(message)){
